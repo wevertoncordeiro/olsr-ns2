@@ -1,0 +1,23 @@
+Installation (Adapted from UM-OLSR, by Francisco J. Ros)
+Copyright (C) 2007-2010 Weverton Cordeiro (wevertoncordeiro@gmail.com)
+
+We assume that you have downloaded and unpackaged the allinone distribution of ns2.
+Assuming that you have downloaded olsr-x.x.xx.tar.gz to your home folder, execute:
+
+$ tar xzf olsr-x.x.xx.tar.gz
+$ cd ns-allinone-x.xx/ns-x.xx/
+$ patch -p1 < ~/olsr-x.x.x/olsr.patch
+
+If you haven't installed ns2 yet, then do the following:
+
+$ cd ..
+$ ./install
+
+On the other hand, if you are installing UM-OLSR on a running installation of ns2:
+
+$ ./configure
+$ make distclean
+$ ./configure
+$ make
+
+NOTE: code should work on previous versions of ns2, but only patches for the latest ones are provided.

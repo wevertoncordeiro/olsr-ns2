@@ -1,0 +1,4 @@
+ACKNOWLEDGEMENTS
+
+Special thanks to Francesca Lo Piccolo (University of Rome Tor Vergata) who has created the OLSR patch for NS-2.34.
+Special thanks to Andrea Detti (University of Rome Tor Vergata), who has reported corrections regarding the 'tc_redundancy' parameter.

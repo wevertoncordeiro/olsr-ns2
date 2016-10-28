@@ -1,0 +1,284 @@
+<html>
+<head>
+<title>Frequently Asked Questions (FAQ) about the OLSR-ETX / ML / MD module for NS-2</title>
+</head>
+
+<body>
+
+<h1>Frequently Asked Questions (FAQ) about the OLSR-ETX / ML / MD module for NS-2</h1>
+
+Copyright (c) 2009 Weverton Luis da Costa Cordeiro
+
+<h2>Acknowledgements</h2>
+
+<p align="justify">Thanks to Francisco J. Ros, who has initially released OLSR code for NS2 (<a target="_blank" href="http://masimum.dif.um.es/?Software:UM-OLSR">http://masimum.dif.um.es/?Software:UM-OLSR</a>) as open source software.</p>
+
+<h2>Introduction</h2>
+
+<p align="justify">I have received several questions regarding the OLSR-ETX / ML / MD module, most of them more than once. In order to ease the process of obtaining information, I have selected the most relevant Q&amp;A and posted in this page, in hope that it will be useful for prospective users. This document is not intended to have the same style of a scientific document or report; in any case, my apologies for mistakes found in it. Comments and contributions are very welcome.</p>
+
+<p align="justify"><b>QUESTION - How do I install the OLSR-ETX / ML / MD module for NS-2?</b></p>
+
+<p align="justify">(Adapted from UM-OLSR, by Francisco J. Ros)<br/>
+<br/>
+The process is fairly simple. Here we assume that you have downloaded and unpackaged the allinone distribution of ns2. Assuming also that you have downloaded olsr-x.x.xx.tar.gz to your home folder, execute:<br/>
+<br/>
+<pre>
+$ tar xzf olsr-x.x.xx.tar.gz
+$ cd ns-allinone-x.xx/ns-x.xx/
+$ patch -p1 < ~/olsr-x.x.x/olsr.patch
+</pre>
+<br/>
+If you haven't installed ns2 yet, then do the following:<br/>
+<br/>
+<pre>
+$ cd ..
+$ ./install
+</pre>
+<br/>
+On the other hand, if you are installing UM-OLSR on a running installation of ns2:<br/>
+<br/>
+<pre>
+$ ./configure
+$ make distclean
+$ ./configure
+$ make
+</pre>
+<br/>
+NOTE: code should work on previous versions of ns2, but only patches for the latest ones are provided.<br/>
+</p>
+
+<p align="justify"><b>QUESTION - What is the purpose of the several parameters of the OLSR-ETX / ML / MD module ?</b></p>
+
+<p align="justify">These parameters are use to specify which algorithms should be used for selection of multipoint relays and computation of routing tables, the behavior of the OLSR protocol, etc.<br/>
+<br/>
+In summary, the implementations that you may find in the web site (<a target="_blank" href="http://www.inf.ufrgs.br/~wlccordeiro/resources/olsr/">http://www.inf.ufrgs.br/~wlccordeiro/resources/olsr/</a>) are actually several versions of the same ns module for simulating the different flavours of OLSR: the original OLSR (as published in RFC 3626), OLSR-ETX (a variation of the original OLSR employing the metric proposed by De Couto et al.), OLSR-ML (proposed by Passos et al.), and OLSR-MD (the one our team have proposed). You may find link to the papers describing each of these papers in <a target="_blank" href="http://www.inf.ufrgs.br/~wlccordeiro/resources.html">http://www.inf.ufrgs.br/~wlccordeiro/resources.html</a> . Basically, what we have done was implementing all these flavors in the same ns module. The behaviour of the module depends on the values assigned to the following variables:<br/>
+<br/>
+Simulation of the ordinary OLSR:<br/>
+<br/>
+<pre>
+Agent/OLSR set mpr_algorithm_        1
+Agent/OLSR set routing_algorithm_    1
+Agent/OLSR set link_quality_         1
+Agent/OLSR set link_delay_           false
+</pre>
+<br/>
+Simulation of OLSR-ETX:<br/>
+<br/>
+<pre>
+Agent/OLSR set mpr_algorithm_        2
+Agent/OLSR set routing_algorithm_    2
+Agent/OLSR set link_quality_         2
+Agent/OLSR set link_delay_           false
+</pre>
+<br/>
+Simulation of OLSR-ML:<br/>
+<br/>
+<pre>
+Agent/OLSR set mpr_algorithm_        2
+Agent/OLSR set routing_algorithm_    2
+Agent/OLSR set link_quality_         3
+Agent/OLSR set link_delay_           false
+</pre>
+<br/>
+Simulation of OLSR-MD:<br/>
+<br/>
+<pre>
+Agent/OLSR set mpr_algorithm_        2
+Agent/OLSR set routing_algorithm_    2
+Agent/OLSR set link_quality_         2  # doesn't matter in this case
+Agent/OLSR set link_delay_           true
+</pre>
+<br/>
+The variable mpr_algorithm_ indicates the Multipoint Relay (MPR) selection algorithm that is going to be used. Some of the algorithms implemented in the OLSR module algorithm are extensive explained in the papers Quality of service routing in ad-hoc networks using OLSR and Optimal path selection in a link state QoS routing protocol.<br/>
+<br/>
+The variable routing_algorithm_, in turn, indicates whether the shortest path or Dijkstra algorithm will be used to compute each node's routing table.<br/>
+<br/>
+The variable link_quality_ indicates how the link quality metric will be computed: if it will either follow the guidelines proposed by De Couto et al (A HighThroughput Path Metric for MultiHop Wireless Routing) or by Passos et al. (Mesh Network Performance Measurements).<br/>
+<br/>
+Finally, the variable link_delay_ indicates whether the minimum delay between nodes will serve as criterion for the selection of paths between them. In order to compute delay, we have used a variation of the CapProbe algorithm (further information and references may be found in Providing Quality of Service for Mesh Networks Using Link Delay Measurements).<br/>
+</p>
+
+<p align="justify"><b>QUESTION - How do I configure my tcl scripts to simulate a mesh network? What do the values for the various OLSR parameters in the TCL scripts mean?</b></p>
+
+<p align="justify">The meaning of the various parameter values used to define the behavior of the OLSR protocol in the TCL script are described in the OLSR_parameter.h file. These are described in the table below:<br/>
+
+<center>
+  <table border="1" cellspacing="0">
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+      <th>Possible Values</th>
+      <th>Value Description</th>
+    </tr>
+    <tr>
+      <td>Agent/OLSR set use_mac_</td>
+      <td>Determines if layer 2 notifications are enabled or not</td>
+      <td><b>true</b>, <b>false</b></td>
+      <td>--</td>
+    </tr>
+    <tr>
+      <td>Agent/OLSR set willingness</td>
+      <td>Willingness of a node for forwarding packets on behalf of other nodes</td>
+      <td>(see RFC 3626)</td>
+      <td>(see RFC 3626)</td>
+    </tr>
+    <tr>
+      <td>Agent/OLSR set hello_ival_</td>
+      <td>HELLO messages' emission interval</td>
+      <td>(see RFC 3626)</td>
+      <td>(see RFC 3626)</td>
+    </tr>
+    <tr>
+      <td>Agent/OLSR set tc_ival_</td>
+      <td>TC messages' emission interval</td>
+      <td>(see RFC 3626)</td>
+      <td>(see RFC 3626)</td>
+    </tr>
+    <tr>
+      <td rowspan="4">Agent/OLSR set tc_redundancy_ (<b>v 0.2.2 and prior, see below</b>)</td>
+      <td rowspan="4">Determine the redundancy level of TC messages</td>
+      <td>0 (OLSR_TC_REDUNDANCY_MPR_SEL_SET)</td>
+      <td>(see RFC 3626)</td>
+    </tr>
+    <tr>
+      <td>1 (OLSR_TC_REDUNDANCY_MPR_SEL_SET_PLUS_MPR_SET)</td>
+      <td>(see RFC 3626)</td>
+    </tr>
+    <tr>
+      <td>2 (OLSR_TC_REDUNDANCY_FULL)</td>
+      <td>(see RFC 3626)</td>
+    </tr>
+    <tr>
+      <td>3 (OLSR_TC_REDUNDANCY_MPR_SET)</td>
+      <td>non-OLSR standard: publish mpr set only</td>
+    </tr>
+    <tr>
+      <td rowspan="5">Agent/OLSR set mpr_algorithm_</td>
+      <td rowspan="5">Indicate which MPR selection algorithm will be used</td>
+      <td>1 (OLSR_DEFAULT_MPR)</td>
+      <td>use the original MPR selection algorithm as proposed in RFC 3626</td>
+    </tr>
+    <tr>
+      <td>2 (OLSR_MPR_R1)</td>
+      <td>non-OLSR standard: use the MPR selection algorithm OLSR_R1 (<a href="http://portal.acm.org/citation.cfm?id=821754" target="_blank">paper</a>)</td>
+    </tr>
+    <tr>
+      <td>3 (OLSR_MPR_R2)</td>
+      <td>non-OLSR standard: use the MPR selection algorithm OLSR_R2 (<a href="http://portal.acm.org/citation.cfm?id=821754" target="_blank">paper</a>)</td>
+    </tr>
+    <tr>
+      <td>4 (OLSR_MPR_QOLSR)</td>
+      <td>non-OLSR standard: use the MPR selection algorithm QOLSR_MPR_Selection (<a href="http://portal.acm.org/citation.cfm?id=1115064" target="_blank">paper</a>)</td>
+    </tr>
+    <tr>
+      <td>5 (OLSR_MPR_OLSRD)</td>
+      <td>non-OLSR standard: use the MPR selection algorithm implemented in olsrd (see <a href="http://www.olsr.org/" target="_blank">http://www.olsr.org/</a>)</td>
+    </tr>
+    <tr>
+      <td rowspan="2">Agent/OLSR set routing_algorithm_</td>
+      <td rowspan="2">Determine which routing algorith is to be used</td>
+      <td>1 (OLSR_DEFAULT_ALGORITHM)</td>
+      <td>use the original hop count algorithm as proposed in RFC 3626</td>
+    </tr>
+    <tr>
+      <td>2 (OLSR_DIJKSTRA_ALGORITHM)</td>
+      <td>non-OLSR standard: use Dijkstra algorithm to compute routes based on the metric enabled</td>
+    </tr>
+    <tr>
+      <td rowspan="3">Agent/OLSR set link_quality_</td>
+      <td rowspan="3">Determines which heuristic should be used for link quality computation</td>
+      <td>1 (OLSR_BEHAVIOR_NONE)</td>
+      <td>No link quality computation, default OLSR behavior</td>
+    </tr>
+    <tr>
+      <td>2 (OLSR_BEHAVIOR_ETX)</td>
+      <td>non-OLSR standard: use the ETX metric to assert link quality between nodes (<a href="http://pdos.csail.mit.edu/~decouto/my-papers/mobicom03.pdf" target="_blank">paper</a>)</td>
+    </tr>
+    <tr>
+      <td>3 (OLSR_BEHAVIOR_ML)</td>
+      <td>non-OLSR standard: use the ML metric to assert link quality between nodes (<a href="http://www.midiacom.uff.br/~schara/publications/i2ts06.pdf" target="_blank">paper</a>)</td>
+    </tr>
+    <tr>
+      <td>* Agent/OLSR set fish_eye_</td>
+      <td>Determine whether fish eye extension should be used</td>
+      <td><b>true</b>, <b>false</b></td>
+      <td>(see <a href="http://portal.acm.org/citation.cfm?id=1260671" target="_blank">paper</a>; <b>note:</b> the fish eye extension is not guaranteed to work properly as specified)</td>
+    </tr>
+    <tr>
+      <td>Agent/OLSR set link_delay_</td>
+      <td>Determine whether the link delay extension should be enabled</td>
+      <td><b>true</b>, <b>false</b></td>
+      <td>(see <a href="http://dx.doi.org/10.1109/icccn.2007.4317947" target="_blank">paper</a>)</td>
+    </tr>
+    <tr>
+      <td>Agent/OLSR set c_alpha_</td>
+      <td>Factor that will be used to smooth link delays</td>
+      <td>[0,1]</td>
+      <td>(see <a href="http://dx.doi.org/10.1109/icccn.2007.4317947" target="_blank">paper</a>)</td>
+    </tr>
+  </table>
+</center><br/>
+<br/><b>IMPORTANT:</b> In the case of the OLSR modules prior to version 0.2.3, the values specified to the <i>tc_redundancy_</i> parameter have a different interpretation, non-compliant to RFC 3626, as follows:<br/>
+<br/>
+<center>
+  <table border="1" cellspacing="0">
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+      <th>Possible Values</th>
+      <th>Value Description</th>
+    </tr>
+    <tr>
+      <td rowspan="4">Agent/OLSR set tc_redundancy_</td>
+      <td rowspan="4">Determine the redundancy level of TC messages</td>
+      <td>0</td>
+      <td>non-OLSR standard: no node is published in TC messages</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>non-OLSR standard: publish the mpr set in TC messages</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>non-OLSR standard: publish the mpr sel set in TC messages</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>non-OLSR standard: publish the mpr set plus mpr sel set in TC messages</td>
+    </tr>
+  </table>
+</center><br/>
+</p>
+
+<p align="justify"><b>QUESTION - How should I use the scripts (result.sh and run.sh) placed in "other" directory?</b></p>
+
+<p align="justify">The scripts run.sh and result.sh are actually a batch for processing the wtrace.tr file generated during the simulation execution. run.sh runs the simulation 10 times, using 10 different seeds for the random number generator, and result.sh aggregates the information about throughput, delay, jitter, and packet loss from all the 10 simulations, and outputs a .txt that contains data to plot graphics for each of these aspects evaluated.<br/>
+<br/>
+Just for documentation, within the script named run.sh, you'll find the words ATRASO, VAZAO, and bloqueio. These are Portuguese words for DELAY, THROUGHPUT, and loss, respectively.<br/>
+<br/>
+The bash scripts run.sh and result.sh use a number of .pl scripts, developed by Prof. Dr. Mauro Margalho Coutinho and available at <a target="_blank" href="http://www.cci.unama.br/margalho/simulacao/simulacao.htm">http://www.cci.unama.br/margalho/simulacao/simulacao.htm</a> . With these files you'll be able to calculate the metrics for each simulated protocol. Also there is a 'conv' program that is required within the run.sh. This little program I wrote for converting a number from scientific notation to decimal notation. The source code of this program is available at <a target="_blank" href="http://www.inf.ufrgs.br/~wlccordeiro/resources/olsr/">http://www.inf.ufrgs.br/~wlccordeiro/resources/olsr/</a> .<br/>
+</p>
+
+<p align="justify"><b>QUESTION - I would like to develop my own enhancements to the OLSR-ETX / ML / MD module. How can I do that?</b></p>
+
+<p align="justify">There is a tutorial on how to implement a manet routing protocol written by Francisco J. Ros, which is available at <a target="_blank" href="http://masimum.inf.um.es/?Documents">http://masimum.inf.um.es/?Documents</a> . This is a good starting point to understand how the OLSR protocol was actually implemented under ns2, and where to start implementing your own stuff.<br/>
+<br/>
+</p>
+
+<p align="justify"><b>QUESTION - When using a mobile scenario (i.e., cbr-traffic, mobile senders, stationary receivers), the packet loss is enormous when using "ETX" and "Dijkstra" as OLSR settings. Analyzing the tracefile yields a lot of loops (most of them in the beginning, when the packet is immediately sent back to the receiver) and some where the packet runs in a "local loop". Why does it happen?</b></p>
+
+<p align="justify">This problem is actually a drawback of OLSR (RFC 3626) and also of OLSRv2 (<a target="_blank" href="http://www.ietf.org/id/draft-ietf-manet-olsrv2-09.txt">http://www.ietf.org/id/draft-ietf-manet-olsrv2-09.txt</a>). This has been noticed not only on simulation, but also on experimental testbeds and production networks (using the olsrd daemon). The majority of mobile ad hoc networks practitioners argue this is caused by MPRs, which tend to function nicely in highly dense environments, but create these shortcoming in sparse networks. Others believe this is due to the excessive flooding of TC messages in the network. Below you may find some messages in discussion lists regarding this issue:<br/>
+<br/>
+<a target="_blank" href="http://www.ietf.org/mail-archive/web/manet-dt/current/msg00255.html">http://www.ietf.org/mail-archive/web/manet-dt/current/msg00255.html</a><br/>
+<a target="_blank" href="http://lists.olsr.org/pipermail/olsr-users/2008-June/002590.html">http://lists.olsr.org/pipermail/olsr-users/2008-June/002590.html</a><br/>
+<a target="_blank" href="http://www.ietf.org/mail-archive/web/manet/current/msg11161.html">http://www.ietf.org/mail-archive/web/manet/current/msg11161.html</a><br/>
+<a target="_blank" href="http://www.open-mesh.org/wiki/the-olsr-story">http://www.open-mesh.org/wiki/the-olsr-story</a><br/>
+<br/>
+At the time we were conducting our research with OLSR-MD, the Fish-Eye extension was introduced to OLSR (see <a target="_blank" href="http://portal.acm.org/citation.cfm?id=1260671">http://portal.acm.org/citation.cfm?id=1260671</a> and <a target="_blank" href="http://lists.olsr.org/pipermail/olsr-cvs/2005-December/000093.html">http://lists.olsr.org/pipermail/olsr-cvs/2005-December/000093.html</a> as initial references). However, the tests we have conducted with Fish-Eye under NS2 simulations were rather misleading, thus we have not activated it in our simulations (even though it is coded in the OLSR module we have extended).<br/>
+<br/>
+We believe an initial effort towards mitigating this issue is looking at OLSRD, a variant of OLSR that has tackled this issue on experimental and real testbeds.<br/>
+</p>
+
+</body>
+</html>
